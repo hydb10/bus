@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Уведомление об оплате</title>
+  <style>
+    body {
+      margin: 0;
+      font: Arial Black;
+      background: #FFF5EE;
+      color: #1a1446;
+      text-align: center;
+    }
+    .header {
+      background: #1a1446;
+      color: white;
+      padding: 17px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .logo {
+      margin: 18px 0;
+    }
+    .logo img {
+      height: 80px;
+    }
+    .qr {
+      margin: 0px 0;
+    }
+    .qr img {
+      margin: -20px 0;
+      height: 430px;
+    }
+    .main {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .bus {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 8px 0 5px 0;
+    }
+    .price {
+      font-size: 45px;
+      margin: 0 0 15px 0;
+    }
+    .time {
+      margin: 10px 0;
+      font-size: 20px;
+    }
+    .ts {
+      margin: 0px 0;
+      font-size: 17px;
+      color: #D3D3D3;
+    }
+    .counter-label {
+      margin-top: 25px;
+      font-size: 17px;
+    }
+    .counter {
+      font-size: 30px;
+      margin: 0px 0 20px 0;
+    }
+    .ticket-info {
+      font-size: 16px;
+      margin-top: 20px;
+      color: #1a1446;;
+    }
+    .download {
+      margin: 30px;
+      font: Hokushka Pro;
+    }
+    .download button {
+      background: #9ACD32;
+      border: none;
+      padding: 14px 150px;
+      font-size: 16px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div class="header">Уведомление об оплате</div>
+
+  <!-- ЛОГОТИП СБП ВСТАВЛЯЕТСЯ ЗДЕСЬ -->
+  <div class="logo">
+    <img src=logo.svg>
+  </div>
+
+  <div class="main">
+    <p>Ваш проезд успешно оплачен!</p><br>
+    <p class="bus">Автобус: №77</p>
+    <p class="price">24 ₽</p>
+    <p class="time" id="datetime"></p>
+    <p class="ts">Т/С: 408</p>
+    <div class="counter-label">С момента оплаты прошло:</div>
+    <div class="counter" id="counter">00:00:00</div>
+
+    <!-- QR-КОД ВСТАВЛЯЕТСЯ СЮДА -->
+    <div class="qr">
+      <img src=ERROR_qrcode.png>
+    </div>
+
+    <div class="ticket-info">
+      Серия билета: <b>QR201022000123</b><br>
+      Номер билета: 20250926171434239<br><br><br><br>
+      Предъявите контролеру QR-код.<br>
+      Чтобы сохранить реквизиты билета, нажмите кнопку<br>
+      «Скачать»
+    </div>
+
+    <div class="download">
+      <button onclick="downloadTicket()">Скачать билет</button>
+    </div>
+  </div>
+
+  <script>
+    // Получение времени открытия сайта (-5 часов относительно текущего)
+    function formatDate(date) {
+      let dd = String(date.getDate()).padStart(2, '0');
+      let mm = String(date.getMonth() + 1).padStart(2, '0');
+      let yyyy = date.getFullYear();
+      let hh = String(date.getHours()).padStart(2, '0');
+      let min = String(date.getMinutes()).padStart(2, '0');
+      return dd + '.' + mm + '.' + yyyy + ' ' + hh + ':' + min;
+    }
+
+    const now = new Date();
+    // Минус 5 часов
+    const offsetNow = new Date(now.getTime() - (0 * 60 * 60 * 1000));
+    const datetimeStr = formatDate(offsetNow);
+    document.getElementById('datetime').textContent = datetimeStr;
+
+    // Таймер с момента открытия
+    let seconds = 0;
+    function updateCounter() {
+      seconds++;
+      let mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      let secs = String(seconds % 60).padStart(2, '0');
+      document.getElementById('counter').textContent = mins + ':' + secs;
+    }
+    setInterval(updateCounter, 1000);
+
+    // QR-код
+    let qrText = 'билет: серия: "QR201022000123" номер: "20250926171434239" дата: "' + datetimeStr + '" маршрут: "77" тс: тип: "Автобус" номер: "408"';
+    new QRCode(document.getElementById("qrcode"), {
+      text: qrText,
+      width: 200,
+      height: 200
+    });
+
+    // Скачать билет (просто сохраняем как текст)
+    function downloadTicket() {
+      let content = qrText;
+      let blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      let link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "ticket.txt";
+      link.click();
+    }
+  </script>
+</body>
+</html>
